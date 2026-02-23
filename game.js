@@ -136,24 +136,24 @@ countries.forEach(country => {
 });
 
 startGame();
-const worldObject = document.getElementById("worldObject");
-
 worldObject.addEventListener("load", function() {
 
   const svgDoc = worldObject.contentDocument;
+  const svgElement = svgDoc.querySelector("svg");
+
+  // Colorear países
   const countries = svgDoc.querySelectorAll("path");
 
   countries.forEach(country => {
-
-    // Color aleatorio tipo atlas
     const hue = Math.floor(Math.random() * 360);
-    country.style.fill = `hsl(${hue}, 60%, 70%)`;
-    country.style.stroke = "#ffffff";
-    country.style.strokeWidth = "0.5";
+    const color = `hsl(${hue}, 60%, 70%)`;
 
+    country.setAttribute("fill", color);
+    country.setAttribute("stroke", "#ffffff");
+    country.setAttribute("stroke-width", "0.5");
   });
 
-});
-worldObject.addEventListener("load", function() {
+  // 🔥 ARRANCAR JUEGO AQUÍ
   nextRound();
+
 });
