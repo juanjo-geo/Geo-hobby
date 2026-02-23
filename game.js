@@ -80,30 +80,54 @@ function pixelToLat(y, height) {
   return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(mercN) - Math.exp(-mercN)));
 }
 
-svg.addEventListener("click", function(event) {
-  clearInterval(interval);
+const worldObject = document.getElementById("worldObject");
 
-  const rect = svg.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
+worldObject.addEventListener("load", function() {
 
-  const lon = pixelToLon(x, rect.width);
-  const lat = pixelToLat(y, rect.height);
+  const svgDoc = worldObject.contentDocument;
+  const svgElement = svgDoc.querySelector("svg");
 
-  const distance = calculateDistance(lat, lon, currentCity.lat, currentCity.lon);
-  const base = calculateScore(distance);
-  const multiplier = getTimeMultiplier(timer);
-  const final = Math.round(base * multiplier);
+  // 🎨 Colorear países
+  const countries = svgDoc.querySelectorAll("path");
 
-  totalScore += final;
-  totalScoreDisplay.textContent = totalScore;
+  countries.forEach(country => {
+    const hue = Math.floor(Math.random() * 360);
+    country.style.fill = `hsl(${hue}, 60%, 70%)`;
+    country.style.stroke = "#ffffff";
+    country.style.strokeWidth = "0.5";
+  });
 
-  result.innerHTML = `
-    Distancia: ${distance.toFixed(0)} km<br>
-    Base: ${base} pts<br>
-    Multiplicador: x${multiplier}<br>
-    Ganaste: ${final} pts
-  `;
+  // 🖱 Detectar clic real en el mapa
+  svgElement.addEventListener("click", function(event) {
+
+    clearInterval(interval);
+
+    const rect = svgElement.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const lon = pixelToLon(x, rect.width);
+    const lat = pixelToLat(y, rect.height);
+
+    const distance = calculateDistance(lat, lon, currentCity.lat, currentCity.lon);
+    const base = calculateScore(distance);
+    const multiplier = getTimeMultiplier(timer);
+    const final = Math.round(base * multiplier);
+
+    totalScore += final;
+    totalScoreDisplay.textContent = totalScore;
+
+    result.innerHTML = `
+      Distancia: ${distance.toFixed(0)} km<br>
+      Base: ${base} pts<br>
+      Multiplicador: x${multiplier}<br>
+      Ganaste: ${final} pts
+    `;
+
+    setTimeout(nextRound, 2000);
+  });
+
+});
 
   setTimeout(nextRound, 2000);
 });
