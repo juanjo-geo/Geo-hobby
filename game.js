@@ -1,43 +1,21 @@
-const svg = document.getElementById("map");
-const cityName = document.getElementById("cityName");
-const result = document.getElementById("result");
-const totalScoreDisplay = document.getElementById("totalScore");
-const roundDisplay = document.getElementById("round");
-const timerDisplay = document.getElementById("timer");
-
-let totalScore = 0;
-let round = 0;
+let currentCity;
 let timer = 20;
 let interval;
-let gameCities = [];
-let currentCity;
+let score = 0;
 
-function getRandomCities(array, count) {
-  return [...array].sort(() => 0.5 - Math.random()).slice(0, count);
-}
+const cityName = document.getElementById("cityName");
+const timerDisplay = document.getElementById("timer");
+const scoreDisplay = document.getElementById("score");
+const result = document.getElementById("result");
 
-function startGame() {
-  gameCities = getRandomCities(allCities, 10);
-  nextRound();
-}
-
-function nextRound() {
-  if (round >= 10) {
-    cityName.textContent = "Juego terminado 🎉";
-    return;
-  }
-
-  currentCity = gameCities[round];
-  cityName.textContent = `Ubica: ${currentCity.name} (${currentCity.country})`;
-  round++;
-  roundDisplay.textContent = round;
-
+function startTimer() {
   timer = 20;
   timerDisplay.textContent = timer;
 
   interval = setInterval(() => {
     timer--;
     timerDisplay.textContent = timer;
+
     if (timer <= 0) {
       clearInterval(interval);
       nextRound();
@@ -45,30 +23,26 @@ function nextRound() {
   }, 1000);
 }
 
+function nextRound() {
+  currentCity = cities[Math.floor(Math.random() * cities.length)];
+  cityName.textContent = currentCity.name;
+  result.innerHTML = "";
+  startTimer();
+}
+
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
+
   const a =
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
-}
-
-function calculateScore(distance) {
-  if (distance < 50) return 1000;
-  if (distance < 200) return 800;
-  if (distance < 500) return 500;
-  if (distance < 1000) return 250;
-  return 50;
-}
-
-function getTimeMultiplier(timeLeft) {
-  if (timeLeft >= 14) return 2;
-  if (timeLeft >= 7) return 1;
-  return 0.5;
 }
 
 function pixelToLon(x, width) {
@@ -76,84 +50,57 @@ function pixelToLon(x, width) {
 }
 
 function pixelToLat(y, height) {
-  const mercN = Math.PI - (2 * Math.PI * y) / height;
-  return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(mercN) - Math.exp(-mercN)));
+  return 90 - (y / height) * 180;
 }
 
-const worldObject = document.getElementById("worldObject");
+document.addEventListener("DOMContentLoaded", () => {
 
-worldObject.addEventListener("load", function() {
+  const worldObject = document.getElementById("worldObject");
 
-  const svgDoc = worldObject.contentDocument;
-  const svgElement = svgDoc.querySelector("svg");
+  worldObject.addEventListener("load", () => {
 
-  // 🎨 Colorear países
-countries.forEach(country => {
+    const svgDoc = worldObject.contentDocument;
+    const svg = svgDoc.querySelector("svg");
+    const paths = svgDoc.querySelectorAll("path");
 
-  const hue = Math.floor(Math.random() * 360);
-  const color = `hsl(${hue}, 60%, 70%)`;
+    // 🎨 Colorear países
+    paths.forEach(path => {
+      const hue = Math.floor(Math.random() * 360);
+      path.setAttribute("fill", `hsl(${hue}, 60%, 70%)`);
+      path.setAttribute("stroke", "#ffffff");
+      path.setAttribute("stroke-width", "0.5");
+    });
 
-  country.setAttribute("fill", color);
-  country.setAttribute("stroke", "#ffffff");
-  country.setAttribute("stroke-width", "0.5");
+    // 🖱 Click en mapa
+    svg.addEventListener("click", (event) => {
 
-});
+      clearInterval(interval);
+
+      const rect = svg.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      const guessedLon = pixelToLon(x, rect.width);
+      const guessedLat = pixelToLat(y, rect.height);
+
+      const distance = calculateDistance(
+        guessedLat,
+        guessedLon,
+        currentCity.lat,
+        currentCity.lon
+      );
+
+      const roundScore = Math.max(0, 5000 - distance);
+      score += Math.round(roundScore);
+
+      scoreDisplay.textContent = score;
+
+      result.innerHTML = `Distancia: ${distance.toFixed(0)} km`;
+
+      setTimeout(nextRound, 2000);
+    });
+
+    // 🚀 Iniciar juego
+    nextRound();
   });
-
-  // 🖱 Detectar clic real en el mapa
-  svgElement.addEventListener("click", function(event) {
-
-    clearInterval(interval);
-
-    const rect = svgElement.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    const lon = pixelToLon(x, rect.width);
-    const lat = pixelToLat(y, rect.height);
-
-    const distance = calculateDistance(lat, lon, currentCity.lat, currentCity.lon);
-    const base = calculateScore(distance);
-    const multiplier = getTimeMultiplier(timer);
-    const final = Math.round(base * multiplier);
-
-    totalScore += final;
-    totalScoreDisplay.textContent = totalScore;
-
-    result.innerHTML = `
-      Distancia: ${distance.toFixed(0)} km<br>
-      Base: ${base} pts<br>
-      Multiplicador: x${multiplier}<br>
-      Ganaste: ${final} pts
-    `;
-
-    setTimeout(nextRound, 2000);
-  });
-
-});
-
-  setTimeout(nextRound, 2000);
-});
-
-startGame();
-worldObject.addEventListener("load", function() {
-
-  const svgDoc = worldObject.contentDocument;
-  const svgElement = svgDoc.querySelector("svg");
-
-  // Colorear países
-  const countries = svgDoc.querySelectorAll("path");
-
-  countries.forEach(country => {
-    const hue = Math.floor(Math.random() * 360);
-    const color = `hsl(${hue}, 60%, 70%)`;
-
-    country.setAttribute("fill", color);
-    country.setAttribute("stroke", "#ffffff");
-    country.setAttribute("stroke-width", "0.5");
-  });
-
-  // 🔥 ARRANCAR JUEGO AQUÍ
-  nextRound();
-
 });
