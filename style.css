@@ -1,36 +1,14 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6f9;
-}
-
-header {
-  background: #1f2937;
-  color: white;
-  padding: 15px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.scoreboard span {
-  margin-left: 20px;
-}
-
-.game-container {
-  display: flex;
-  height: calc(100vh - 80px);
-}
-
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
 }
 
-.map-wrapper {
+.map-container {
   width: 100vw;
-  height: 100vh;
+  height: 70vh;
 }
 
 #worldObject {
@@ -39,22 +17,9 @@ html, body {
   display: block;
 }
 
-.side-panel {
-  flex: 1;
-  background: white;
-  padding: 20px;
-  border-left: 3px solid #e5e7eb;
-}
-
-.instructions {
-  margin-top: 30px;
-  font-size: 14px;
-  background: #f3f4f6;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.country {
-  stroke: #ffffff;
-  stroke-width: 0.5;
+.panel {
+  height: 30vh;
+  padding: 15px;
+  background: #111827;
+  color: white;
 }
