@@ -10,6 +10,11 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("SVG cargado correctamente");
     console.log("Cantidad de países:", paths.length);
 
+    if (!paths || paths.length === 0) {
+      console.log("No se encontraron paths");
+      return;
+    }
+
     iniciarJuego(paths);
 
   });
@@ -19,11 +24,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function iniciarJuego(paths) {
 
-  if (!paths || paths.length === 0) {
-    console.log("No se encontraron paths");
-    return;
-  }
+  // 🎨 Pintar todos los países gris claro
+  paths.forEach(path => {
+    path.style.fill = "#dcdcdc";
+  });
 
-  alert("Juego iniciado correctamente 🚀");
+  // 🧪 Prueba: pintar uno aleatorio azul
+  const randomIndex = Math.floor(Math.random() * paths.length);
+  paths[randomIndex].style.fill = "steelblue";
 
+  console.log("Mapa pintado correctamente");
 }
