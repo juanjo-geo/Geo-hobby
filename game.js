@@ -5,13 +5,13 @@ document.addEventListener("DOMContentLoaded", function () {
   worldObject.addEventListener("load", function () {
 
     const svgDoc = worldObject.contentDocument;
-    const paths = svgDoc.querySelectorAll("path");
 
-    console.log("SVG cargado correctamente");
-    console.log("Cantidad de países:", paths.length);
+    const paths = svgDoc.querySelectorAll("path, polygon");
+
+    console.log("Elementos encontrados:", paths.length);
 
     if (!paths || paths.length === 0) {
-      console.log("No se encontraron paths");
+      console.log("No se encontraron elementos");
       return;
     }
 
@@ -24,12 +24,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function iniciarJuego(paths) {
 
-  // 🎨 Pintar todos los países gris claro
-  paths.forEach(path => {
-    path.style.fill = "#dcdcdc";
+  paths.forEach(el => {
+    el.style.fill = "#dcdcdc";
   });
 
-  // 🧪 Prueba: pintar uno aleatorio azul
   const randomIndex = Math.floor(Math.random() * paths.length);
   paths[randomIndex].style.fill = "steelblue";
 
