@@ -151,3 +151,6 @@ worldObject.addEventListener("load", function() {
   });
 
 });
+worldObject.addEventListener("load", function() {
+  nextRound();
+});
