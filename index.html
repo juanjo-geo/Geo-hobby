@@ -1,265 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Geo Hobby</title>
-
-<style>
-body{
-margin:0;
-background:linear-gradient(135deg,#0f172a,#1e293b);
-color:white;
-font-family:'Segoe UI',sans-serif;
-text-align:center;
-}
-
-h1{margin-top:10px;}
-
-.topbar{
-display:flex;
-justify-content:space-between;
-padding:10px 15px;
-font-size:14px;
-flex-wrap:wrap;
-}
-
-canvas{
-width:95%;
-max-width:1000px;
-height:auto;
-border-radius:12px;
-margin-top:10px;
-cursor:pointer;
-}
-
-button{
-margin-top:10px;
-padding:10px 20px;
-border:none;
-border-radius:8px;
-background:#22c55e;
-color:white;
-font-size:16px;
-box-shadow:0 4px 15px rgba(0,0,0,0.3);
-transition:0.2s;
-}
-
-button:hover{
-transform:scale(1.05);
-}
-
-select{
-padding:6px;
-border-radius:6px;
-}
-
-.highlight{
-color:#22c55e;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>GeoReto</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>🌍 Geo Hobby</h1>
+<header>
+  <h1>🌍 GeoReto</h1>
+  <div class="scoreboard">
+    <span>Ciudad: <span id="round">1</span>/10</span>
+    <span>Puntos: <span id="totalScore">0</span></span>
+    <span>Tiempo: <span id="timer">20</span>s</span>
+  </div>
+</header>
 
-<div>
-<select id="mode">
-<option value="all">Mundo</option>
-<option value="LATAM">Latinoamérica</option>
-<option value="Europe">Europa</option>
-<option value="Asia">Asia</option>
-</select>
+<div class="game-container">
+
+  <div class="map-wrapper">
+    <svg id="map" viewBox="0 0 1000 500"></svg>
+  </div>
+
+  <div class="side-panel">
+    <h2 id="cityName">Ciudad aquí</h2>
+    <div id="result"></div>
+
+    <div class="instructions">
+      <h3>Cómo jugar</h3>
+      <p>Haz clic en el punto exacto del mapa donde creas que está la ciudad.</p>
+      <p>Mientras más preciso y rápido, más puntos ganas.</p>
+    </div>
+  </div>
+
 </div>
 
-<div class="topbar">
-<div id="round">Ronda 1/5</div>
-<div id="timer">15s</div>
-<div id="score">Score: 0</div>
-<div id="best">Best: 0</div>
-</div>
-
-<h2 id="cityName"></h2>
-<canvas id="mapCanvas"></canvas>
-<br>
-<button onclick="startGame()">Jugar</button>
-
-<audio id="hitSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.wav"></audio>
-
-<script>
-const canvas=document.getElementById("mapCanvas");
-const ctx=canvas.getContext("2d");
-
-let width=window.innerWidth*0.95;
-let height=width/2;
-canvas.width=width;
-canvas.height=height;
-
-window.addEventListener("resize",()=>{
-width=window.innerWidth*0.95;
-height=width/2;
-canvas.width=width;
-canvas.height=height;
-drawMap();
-});
-
-const mapImg=new Image();
-mapImg.src="https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg";
-mapImg.onload=()=>drawMap();
-
-function drawMap(){
-ctx.drawImage(mapImg,0,0,canvas.width,canvas.height);
-}
-
-const cities=[
-{name:"Tokyo",country:"Japan",lat:35.6762,lon:139.6503,region:"Asia"},
-{name:"Bogotá",country:"Colombia",lat:4.7110,lon:-74.0721,region:"LATAM"},
-{name:"Paris",country:"France",lat:48.8566,lon:2.3522,region:"Europe"},
-{name:"Sydney",country:"Australia",lat:-33.8688,lon:151.2093,region:"Asia"},
-{name:"New York",country:"USA",lat:40.7128,lon:-74.0060,region:"all"},
-{name:"Madrid",country:"Spain",lat:40.4168,lon:-3.7038,region:"Europe"},
-{name:"Mexico City",country:"Mexico",lat:19.4326,lon:-99.1332,region:"LATAM"},
-{name:"Buenos Aires",country:"Argentina",lat:-34.6037,lon:-58.3816,region:"LATAM"},
-{name:"Cape Town",country:"South Africa",lat:-33.9249,lon:18.4241,region:"Asia"},
-{name:"London",country:"UK",lat:51.5074,lon:-0.1278,region:"Europe"}
-];
-
-let score=0;
-let round=1;
-let currentCity;
-let timerInterval;
-let timeLeft=15;
-let gameActive=false;
-let bestScore=localStorage.getItem("bestScore")||0;
-
-document.getElementById("best").innerText="Best: "+bestScore;
-
-function getRandomCity(){
-const mode=document.getElementById("mode").value;
-let filtered=cities;
-if(mode!=="all"){
-filtered=cities.filter(c=>c.region===mode);
-}
-return filtered[Math.floor(Math.random()*filtered.length)];
-}
-
-function startGame(){
-score=0;
-round=1;
-gameActive=true;
-nextRound();
-}
-
-function nextRound(){
-if(round>5){
-endGame();
-return;
-}
-drawMap();
-currentCity=getRandomCity();
-document.getElementById("cityName").innerHTML="Ubica: <span class='highlight'>"+currentCity.name+"</span>";
-document.getElementById("round").innerText="Ronda "+round+"/5";
-startTimer();
-}
-
-function startTimer(){
-timeLeft=15;
-document.getElementById("timer").innerText=timeLeft+"s";
-clearInterval(timerInterval);
-timerInterval=setInterval(()=>{
-timeLeft--;
-document.getElementById("timer").innerText=timeLeft+"s";
-if(timeLeft<=0){
-clearInterval(timerInterval);
-round++;
-nextRound();
-}
-},1000);
-}
-
-canvas.addEventListener("click",e=>{
-if(!gameActive) return;
-clearInterval(timerInterval);
-
-const rect=canvas.getBoundingClientRect();
-const x=e.clientX-rect.left;
-const y=e.clientY-rect.top;
-
-const guess=xyToLatLon(x,y);
-const distance=getDistance(guess.lat,guess.lon,currentCity.lat,currentCity.lon);
-
-let points=Math.max(0,5000-distance*2);
-score+=Math.round(points);
-
-document.getElementById("hitSound").play();
-
-const real=latLonToXY(currentCity.lat,currentCity.lon);
-animateLine(x,y,real.x,real.y);
-
-document.getElementById("score").innerText="Score: "+score;
-
-setTimeout(()=>{
-round++;
-nextRound();
-},2000);
-});
-
-function animateLine(x1,y1,x2,y2){
-let progress=0;
-function draw(){
-progress+=0.03;
-if(progress>1) progress=1;
-
-drawMap();
-
-const currentX=x1+(x2-x1)*progress;
-const currentY=y1+(y2-y1)*progress;
-
-ctx.beginPath();
-ctx.moveTo(x1,y1);
-ctx.lineTo(currentX,currentY);
-ctx.strokeStyle="yellow";
-ctx.stroke();
-
-if(progress<1){
-requestAnimationFrame(draw);
-}
-}
-draw();
-}
-
-function latLonToXY(lat,lon){
-return{
-x:(lon+180)*(canvas.width/360),
-y:(90-lat)*(canvas.height/180)
-};
-}
-
-function xyToLatLon(x,y){
-return{
-lon:x*360/canvas.width-180,
-lat:90-y*180/canvas.height
-};
-}
-
-function getDistance(lat1,lon1,lat2,lon2){
-const R=6371;
-const dLat=(lat2-lat1)*Math.PI/180;
-const dLon=(lon2-lon1)*Math.PI/180;
-const a=Math.sin(dLat/2)**2+
-Math.cos(lat1*Math.PI/180)*
-Math.cos(lat2*Math.PI/180)*
-Math.sin(dLon/2)**2;
-return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-}
-
-function endGame(){
-gameActive=false;
-document.getElementById("cityName").innerText="Juego terminado!";
-if(score>bestScore){
-localStorage.setItem("bestScore",score);
-}
-}
-</script>
+<script src="cities.js"></script>
+<script src="game.js"></script>
 
 </body>
 </html>
