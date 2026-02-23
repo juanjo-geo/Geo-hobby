@@ -5,31 +5,71 @@ document.addEventListener("DOMContentLoaded", function () {
   worldObject.addEventListener("load", function () {
 
     const svgDoc = worldObject.contentDocument;
+    const countries = svgDoc.querySelectorAll("path, polygon");
 
-    const paths = svgDoc.querySelectorAll("path, polygon");
-
-    console.log("Elementos encontrados:", paths.length);
-
-    if (!paths || paths.length === 0) {
-      console.log("No se encontraron elementos");
+    if (!countries || countries.length === 0) {
+      console.log("No se encontraron países");
       return;
     }
 
-    iniciarJuego(paths);
+    iniciarJuego(svgDoc, countries);
 
   });
 
 });
 
 
-function iniciarJuego(paths) {
+function iniciarJuego(svgDoc, countries) {
 
-  paths.forEach(el => {
+  // 🎨 Pintar todos gris
+  countries.forEach(el => {
     el.style.fill = "#dcdcdc";
+    el.style.cursor = "pointer";
   });
 
-  const randomIndex = Math.floor(Math.random() * paths.length);
-  paths[randomIndex].style.fill = "steelblue";
+  // 🎯 Tomar 10 ciudades aleatorias
+  const ciudadesSeleccionadas = mezclarArray(cities).slice(0, 10);
 
-  console.log("Mapa pintado correctamente");
+  let indiceActual = 0;
+  let puntos = 0;
+
+  mostrarCiudad();
+
+  function mostrarCiudad() {
+    if (indiceActual >= ciudadesSeleccionadas.length) {
+      alert("Juego terminado. Puntos: " + puntos);
+      return;
+    }
+
+    const ciudad = ciudadesSeleccionadas[indiceActual];
+    document.getElementById("cityName").textContent = ciudad.name;
+  }
+
+  countries.forEach(country => {
+
+    country.addEventListener("click", function () {
+
+      const ciudad = ciudadesSeleccionadas[indiceActual];
+
+      if (country.id === ciudad.countryId) {
+        country.style.fill = "green";
+        puntos += 10;
+      } else {
+        country.style.fill = "red";
+        puntos -= 5;
+      }
+
+      indiceActual++;
+      setTimeout(mostrarCiudad, 500);
+
+    });
+
+  });
+
+}
+
+
+// 🔀 Función para mezclar ciudades
+function mezclarArray(array) {
+  return array.sort(() => Math.random() - 0.5);
 }
