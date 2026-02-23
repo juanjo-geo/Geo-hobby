@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const countries = svgDoc.querySelectorAll("path, polygon");
 
     if (!countries || countries.length === 0) {
-      console.log("No se encontraron países");
+      console.log("No se encontraron países en el SVG");
       return;
     }
 
@@ -19,37 +19,41 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-// 🔁 Mapeo país texto → id real del SVG
+// 🔁 Mapeo país texto (cities.js) → id real del SVG
+// TODO en minúsculas para evitar errores
 const countryMap = {
-  "España": "ES",
-  "Colombia": "CO",
-  "USA": "US",
-  "Japón": "JP",
-  "Italia": "IT",
-  "Alemania": "DE",
-  "Perú": "PE",
-  "Chile": "CL",
-  "Canadá": "CA"
+  "España": "es",
+  "Colombia": "co",
+  "USA": "us",
+  "Japón": "jp",
+  "Italia": "it",
+  "Alemania": "de",
+  "Perú": "pe",
+  "Chile": "cl",
+  "Canadá": "ca"
 };
 
 
 function iniciarJuego(svgDoc, countries) {
 
+  // 🎨 Reset visual
   countries.forEach(el => {
     el.style.fill = "#dcdcdc";
     el.style.cursor = "pointer";
   });
 
-  const ciudadesSeleccionadas = mezclarArray(cities).slice(0, 5);
+  const ciudadesSeleccionadas = mezclarArray([...cities]).slice(0, 5);
 
   let indiceActual = 0;
   let puntos = 0;
 
-  mostrarCiudad();
+  actualizarUI();
 
-  function mostrarCiudad() {
+  function actualizarUI() {
+
     if (indiceActual >= ciudadesSeleccionadas.length) {
-      alert("Juego terminado. Puntos: " + puntos);
+      document.getElementById("cityName").textContent =
+        "Juego terminado - Puntos: " + puntos;
       return;
     }
 
@@ -57,9 +61,12 @@ function iniciarJuego(svgDoc, countries) {
     document.getElementById("cityName").textContent = ciudad.name;
   }
 
+
   countries.forEach(country => {
 
     country.addEventListener("click", function () {
+
+      if (indiceActual >= ciudadesSeleccionadas.length) return;
 
       const ciudad = ciudadesSeleccionadas[indiceActual];
       const countryIdCorrecto = countryMap[ciudad.country];
@@ -69,7 +76,7 @@ function iniciarJuego(svgDoc, countries) {
         return;
       }
 
-      if (country.id === countryIdCorrecto) {
+      if (country.id.toLowerCase() === countryIdCorrecto.toLowerCase()) {
         country.style.fill = "green";
         puntos += 10;
       } else {
@@ -78,7 +85,10 @@ function iniciarJuego(svgDoc, countries) {
       }
 
       indiceActual++;
-      setTimeout(mostrarCiudad, 500);
+
+      setTimeout(() => {
+        actualizarUI();
+      }, 600);
 
     });
 
@@ -87,6 +97,7 @@ function iniciarJuego(svgDoc, countries) {
 }
 
 
+// 🔀 Mezclar array
 function mezclarArray(array) {
   return array.sort(() => Math.random() - 0.5);
 }
