@@ -2,41 +2,24 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>GeoReto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geo Hobby</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header>
-  <h1>🌍 GeoReto</h1>
-  <div class="scoreboard">
-    <span>Ciudad: <span id="round">1</span>/10</span>
-    <span>Puntos: <span id="totalScore">0</span></span>
-    <span>Tiempo: <span id="timer">20</span>s</span>
+  <div class="map-container">
+    <object id="worldObject" type="image/svg+xml" data="world.svg"></object>
   </div>
-</header>
 
-<div class="game-container">
-
-  <div class="map-wrapper">
-  <object id="worldObject" type="image/svg+xml" data="world.svg"></object>
-</div>
-
-  <div class="side-panel">
-    <h2 id="cityName">Ciudad aquí</h2>
+  <div class="panel">
+    <h2 id="cityName">Cargando...</h2>
+    <p>Tiempo: <span id="timer">20</span>s</p>
+    <p>Puntos: <span id="score">0</span></p>
     <div id="result"></div>
-
-    <div class="instructions">
-      <h3>Cómo jugar</h3>
-      <p>Haz clic en el punto exacto del mapa donde creas que está la ciudad.</p>
-      <p>Mientras más preciso y rápido, más puntos ganas.</p>
-    </div>
   </div>
 
-</div>
-
-<script src="cities.js"></script>
-<script src="game.js"></script>
-
+  <script src="cities.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
