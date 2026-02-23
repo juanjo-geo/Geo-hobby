@@ -19,16 +19,28 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+// 🔁 Mapeo país texto → id real del SVG
+const countryMap = {
+  "España": "ES",
+  "Colombia": "CO",
+  "USA": "US",
+  "Japón": "JP",
+  "Italia": "IT",
+  "Alemania": "DE",
+  "Perú": "PE",
+  "Chile": "CL",
+  "Canadá": "CA"
+};
+
+
 function iniciarJuego(svgDoc, countries) {
 
-  // 🎨 Pintar todos gris
   countries.forEach(el => {
     el.style.fill = "#dcdcdc";
     el.style.cursor = "pointer";
   });
 
-  // 🎯 Tomar 10 ciudades aleatorias
-  const ciudadesSeleccionadas = mezclarArray(cities).slice(0, 10);
+  const ciudadesSeleccionadas = mezclarArray(cities).slice(0, 5);
 
   let indiceActual = 0;
   let puntos = 0;
@@ -50,8 +62,14 @@ function iniciarJuego(svgDoc, countries) {
     country.addEventListener("click", function () {
 
       const ciudad = ciudadesSeleccionadas[indiceActual];
+      const countryIdCorrecto = countryMap[ciudad.country];
 
-      if (country.id === ciudad.countryId) {
+      if (!countryIdCorrecto) {
+        console.log("País no mapeado:", ciudad.country);
+        return;
+      }
+
+      if (country.id === countryIdCorrecto) {
         country.style.fill = "green";
         puntos += 10;
       } else {
@@ -69,7 +87,6 @@ function iniciarJuego(svgDoc, countries) {
 }
 
 
-// 🔀 Función para mezclar ciudades
 function mezclarArray(array) {
   return array.sort(() => Math.random() - 0.5);
 }
